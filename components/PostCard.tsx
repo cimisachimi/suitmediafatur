@@ -25,12 +25,11 @@ export default function PostCard({ post, itemNumber }: PostCardProps) {
     <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
       <div className="relative w-full aspect-[16/10]">
         <Image
-          src={post.small_image[0]?.url || '/placeholder.jpg'}
+          src={`/api/image?url=${encodeURIComponent(post.small_image[0]?.url || '/placeholder.jpg')}`}
           alt={post.title}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-           // <-- PROP INI AKAN MENYELESAIKAN MASALAH
         />
         <span className="absolute top-2 left-2 bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">
           {itemNumber}

@@ -1,37 +1,38 @@
+// app/api/ideas/route.ts
 import { NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
-  // Ambil seluruh query string dari request yang masuk dari frontend
-  const { search } = new URL(request.url);
+export async function GET(req: Request) {
+  // Ambil parameter query dari URL request
+  const { search } = new URL(req.url);
 
-  // URL API eksternal
+  // Bangun URL API eksternal
   const externalApiUrl = `https://suitmedia-backend.suitdev.com/api/ideas${search}`;
 
   try {
-    // Lakukan fetch ke API eksternal
-    const res = await fetch(externalApiUrl, {
+    const response = await fetch(externalApiUrl, {
+      method: 'GET',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
+      // Untuk memastikan tidak ada revalidate jika pakai Next cache
+      next: { revalidate: 0 },
     });
 
-    // Jika respons dari API eksternal tidak sukses, teruskan errornya
-    if (!res.ok) {
-      const errorData = await res.json();
-      return NextResponse.json({ message: "Error from external API", details: errorData }, { status: res.status });
+    // Jika respons tidak sukses, lempar error ke client
+    if (!response.ok) {
+      return NextResponse.json(
+        { message: 'Error from external API' },
+        { status: response.status }
+      );
     }
 
-    const data = await res.json();
-    
-    // Kembalikan data dari API eksternal ke frontend Anda
+    // Parse JSON dan kirim ke frontend
+    const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
-    // Tangani error jika fetch ke API eksternal gagal
-    console.error("Proxy fetch error:", error);
+    console.error('Fetch error in proxy:', error);
     return NextResponse.json(
-      { message: 'Failed to fetch data from external API' },
+      { message: 'Internal Server Error' },
       { status: 500 }
     );
   }
